@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$KENNY Airdrop Signup</title>
+    <meta
+      name="description"
+      content="Sign up for the Kenny the Cat Coin $KENNY airdrop tracker."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+  </head>
+  <body class="airdrop-page">
+    <header class="site-header interface-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">
+          <img src="image/kenny official.jpg" alt="Kenny the Cat logo">
+        </span>
+        <span class="brand-text">Kenny the Cat</span>
+      </a>
+      <nav class="site-nav" aria-label="Signup navigation">
+        <a href="index.html">HOME</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="signup-welcome" id="signupWelcome" aria-label="Airdrop welcome">
+        <div class="welcome-orbit">
+          <img src="image/kenny official.jpg" alt="Kenny the Cat">
+        </div>
+        <p class="eyebrow">Airdrop phase</p>
+        <h1>Welcome onboard the Kennyverse</h1>
+        <p>Welcome to the Airdrop phase. Click below to start your $KENNY signup.</p>
+        <button class="button button-primary" type="button" id="startSignupButton">Click here to signup</button>
+      </section>
+
+      <section class="signup-loading" id="signupLoading" hidden aria-live="polite">
+        <div class="loading-coin">
+          <img src="image/load.png" alt="Kenny loading">
+        </div>
+        <p class="eyebrow">Preparing dashboard</p>
+        <h2>Checking your Kennyverse setup</h2>
+        <p id="loadingStatus">Confirming signup details...</p>
+        <div class="loading-bar" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <section class="section signup-interface">
+        <div class="signup-copy">
+          <p class="eyebrow">Kennyverse airdrop</p>
+          <h1>$KENNY Signup</h1>
+          <p class="hero-tagline">
+            Create your airdrop tracker profile, connect your wallet details, and jump into the $KENNY dashboard.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-secondary" href="index.html">Back to landing</a>
+            <a class="button button-secondary" href="login.html">Login</a>
+          </div>
+        </div>
+
+        <form class="signup-card" id="signupForm">
+          <div class="signup-card-header">
+            <img src="image/kenny official.jpg" alt="Kenny the Cat signup logo">
+            <div>
+              <h2>JOIN AIRDROP</h2>
+              <p>Register your profile before checking your rank, points, and referral link.</p>
+            </div>
+          </div>
+
+          <label>
+            Username
+            <input id="signupUsername" type="text" required placeholder="KennyFan">
+          </label>
+          <label>
+            Wallet address
+            <input id="signupWallet" type="text" required placeholder="Paste your Solana wallet address">
+          </label>
+          <label>
+            X username
+            <input id="signupX" type="text" placeholder="@kennyfan">
+          </label>
+          <label>
+            Telegram username
+            <input id="signupTelegram" type="text" placeholder="@kennyfan">
+          </label>
+
+           <label>
+            Email
+            <input id="Email" type="email" placeholder="kennyfan@gmail.com">
+          </label>
+
+          <div class="otp_verify">
+             <label>
+            Enter OTP
+            <input id="signupEmailOTP" type="text" required placeholder="Enter OTP">
+          </label>
+          <button class="btn_otp" id="signupEmailOTP_btn">Verify</button>
+          </div>
+          <button class="btn">Send OTP</button>
+
+          <button class="button button-primary" type="submit">Continue to tracker</button>
+          <p class="form-note">
+            Your signup is saved on this device and opens your airdrop dashboard.
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <script src="script.js?v=welcome-profile-1"></script>
+    <script src="email-otp.js"></script>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$KENNY Airdrop Tracker</title>
+    <meta
+      name="description"
+      content="Track Kenny the Cat Coin $KENNY airdrop participation, points, invites, and meme submissions."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="airdrop-page">
+    <header class="site-header interface-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">
+          <img src="image/kenny official.jpg" alt="Kenny the Cat logo">
+        </span>
+        <span class="brand-text">Kenny the Cat</span>
+      </a>
+      <nav class="site-nav" aria-label="Airdrop navigation">
+        <a href="index.html">Landing</a>
+        <a href="signup.html">Log Out</a>
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#dashboard">Dashboard</a>
+        
+      </nav>
+    </header>
+
+    <main>
+      <section class="section airdrop-section" id="airdrop">
+        <div class="section-heading section-heading-row">
+          <div>
+            <p class="eyebrow">Kennyverse airdrop</p>
+            <h1>$KENNY Tracker</h1>
+            <p class="hero-tagline">
+              Track airdrop participation, points, invites, meme reviews, and Zealy leaderboard activity.
+            </p>
+          </div>
+          <a class="button button-secondary" href="https://zealy.io/cw/kennyverse/leaderboard" target="_blank" rel="noreferrer">
+            Open Zealy
+          </a>
+        </div>
+
+        <div class="metric-strip" aria-label="Campaign metrics">
+          <article class="metric-card">
+            <span>Total participants</span>
+            <strong id="metricParticipants">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Total points tracked</span>
+            <strong id="metricPoints">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Total invites</span>
+            <strong id="metricInvites">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Next refresh</span>
+            <strong><span id="refreshCountdown">60</span>s</strong>
+          </article>
+        </div>
+
+        <div class="tracker-block" id="leaderboard">
+          <div class="section-heading section-heading-row">
+            <div>
+              <p class="eyebrow">Live leaderboard</p>
+              <h2>Airdrop ranking</h2>
+            </div>
+            <div class="status-pill" id="apiStatus">Connecting...</div>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-field">
+              <span>Search users</span>
+              <input id="leaderboardSearch" type="search" placeholder="Username or wallet">
+            </label>
+            <button class="button button-secondary" type="button" id="refreshButton">Refresh now</button>
+          </div>
+
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Username</th>
+                  <th>Total points</th>
+                  <th>Invites</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dashboard-grid tracker-block" id="dashboard">
+          <div>
+            <div class="section-heading">
+              <p class="eyebrow">User dashboard</p>
+              <h2>Check a participant</h2>
+            </div>
+            <form class="lookup-card" id="userLookupForm">
+              <label>
+                Username or wallet address
+                <input id="userLookupInput" type="text" placeholder="Example: KennyFan" autocomplete="off">
+              </label>
+              <button class="button button-primary" type="submit">Load dashboard</button>
+            </form>
+          </div>
+
+          <article class="panel dashboard-card">
+            <div class="profile-row">
+              <div class="profile-main">
+                <label class="profile-photo-control" aria-label="Upload profile picture">
+                  <img id="profilePhotoPreview" src="image/kenny official.jpg" alt="Profile preview">
+                  <input id="profilePhotoInput" type="file" accept="image/*">
+                  <span>Upload photo</span>
+                </label>
+                <div>
+                <span class="stat-label">Selected user</span>
+                <h3 id="dashboardName">No user selected</h3>
+                  <p class="profile-wallet" id="dashboardWallet">Wallet not selected</p>
+                </div>
+              </div>
+              <span class="rank-badge" id="dashboardRank">#--</span>
+            </div>
+            <div class="dashboard-stats">
+              <div>
+                <span>Total points</span>
+                <strong id="dashboardPoints">0</strong>
+              </div>
+              <div>
+                <span>Invites</span>
+                <strong id="dashboardInvites">0</strong>
+              </div>
+              <div>
+                <span>Completed</span>
+                <strong id="dashboardCompleted">0/0</strong>
+              </div>
+            </div>
+            <label class="referral-box">
+              Referral link
+              <div>
+                <input id="referralLink" type="text" readonly value="Select a user to generate a referral link">
+                <button class="icon-button" id="copyReferralButton" type="button" aria-label="Copy referral link">Copy</button>
+              </div>
+            </label>
+          </article>
+        </div>
+
+        <div class="task-layout tracker-block" id="tasks">
+          <article class="panel">
+            <h3>One-time tasks</h3>
+            <div class="task-list" id="oneTimeTasks"></div>
+          </article>
+          <article class="panel">
+            <h3>Daily tasks</h3>
+            <div class="task-list" id="dailyTasks"></div>
+          </article>
+          <article class="panel">
+            <h3>Invite rewards</h3>
+            <div class="task-list">
+              <div class="task-row">
+                <span>Successful invite</span>
+                <strong>5,000 pts each</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+       <!--......................ADMIN..........................-->
+
+        <div class="tracker-block" id="admin"> 
+          <div class="section-heading">
+            <p class="eyebrow">Admin panel</p>
+            <h2>Manage airdrop data</h2>
+          </div>
+          <div class="admin-grid">
+            <form class="panel admin-form" id="awardForm">
+              <h3>Manual point award</h3>
+              <label>
+                Username
+                <input id="awardUsername" type="text" required placeholder="Participant username">
+              </label>
+              <label>
+                Points
+                <input id="awardPoints" type="number" required min="1" step="1" placeholder="1000">
+              </label>
+              <label>
+                Reason
+                <input id="awardReason" type="text" required placeholder="Manual Zealy adjustment">
+              </label>
+              <button class="button button-primary" type="submit">Award points</button>
+            </form>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <h3>Data export</h3>
+                <button class="button button-secondary" type="button" id="exportButton">Export CSV</button>
+              </div>
+              <p class="muted-text">
+                Exports rank, username, wallet address, points, invites, and pending meme status.
+              </p>
+            </article>
+          </div>
+
+          <div class="admin-grid admin-grid-wide">
+            <article class="panel">
+              <div class="panel-heading">
+                <h3>Participants</h3>
+                <span class="status-pill">Wallet view</span>
+              </div>
+              <div class="table-shell compact-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Wallet</th>
+                      <th>Points</th>
+                      <th>Invites</th>
+                    </tr>
+                  </thead>
+                  <tbody id="participantsBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <h3>Meme submissions</h3>
+                <span class="status-pill" id="pendingMemeCount">0 pending</span>
+              </div>
+              <div class="meme-list" id="memeList"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js?v=welcome-profile-1"></script>
+  </body>
+</html>
