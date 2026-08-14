@@ -1,0 +1,117 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login - Kenny</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="airdrop-page">
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark"><img src="image/image (1).jpg" alt="logo"></span>
+      <span class="brand-text">Kenny</span>
+    </a>
+
+    <button class="nav-toggle" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="hamburger"></span>
+    </button>
+
+    <nav class="site-nav" role="navigation">
+      <a href="/">Home</a>
+      <a href="signup.html">Sign up</a>
+      <a href="login.html">Log in</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  
+      <div class="signup-card login-card">
+        <div class="signup-card-header">
+          <img src="image/image (1).jpg" alt="logo">
+          <div>
+            <strong>Account login</strong>
+            <p class="muted-text">Secure access — email must be verified.</p>
+          </div>
+        </div>
+
+        <form id="loginForm" class="auth-form" autocomplete="on">
+          <label>
+            <span class="form-label">Email</span>
+            <input type="email" name="email" id="loginEmail" required placeholder="you@example.com">
+          </label>
+
+          <label>
+            <span class="form-label">Password</span>
+            <input type="password" name="password" id="loginPassword" required placeholder="Your password">
+          </label>
+
+          <div class="form-row" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;color:var(--muted);font-size:0.95rem;">
+              <input type="checkbox" id="rememberMe"> Remember me
+            </label>
+            <a href="/forgo t.html" style="color:var(--muted);font-size:0.95rem;">Forgot?</a>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button button-primary">Log in</button>
+            <a href="signup.html" class="button button-secondary">Create account</a>
+          </div>
+
+          <div id="loginNotice" class="notice" role="status" aria-live="polite" style="display:none"></div>
+        </form>
+
+        <div class="divider" style="height:1px;background:rgba(255,255,255,0.03);margin:12px 0;border-radius:4px"></div>
+
+        <div class="muted-text" style="font-size:0.95rem">Don't have an account? <a href="signup.html">Sign up</a> or use wallet login.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // Basic client-side submission that posts to the existing manual login endpoint.
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const notice = document.getElementById('loginNotice');
+      notice.style.display = 'none';
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch('/api/auth/manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          notice.textContent = data && data.error ? data.error : 'Login failed';
+          notice.style.display = 'block';
+          notice.style.color = 'var(--danger)';
+          // If 403 unverified, show action suggestion
+          if (res.status === 403) {
+            notice.innerHTML = 'Account unverified. <button id="resendOtpInline" class="btn">Resend verification</button>';
+            document.getElementById('resendOtpInline').addEventListener('click', async () => {
+              const r = await fetch('/api/auth/send-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+              if (r.ok) notice.textContent = 'Verification email sent.';
+            });
+          }
+          return;
+        }
+
+        // On success, server may return session token
+        if (data && data.token) {
+          localStorage.setItem('kenny_airdrop_session_token', data.token);
+        }
+        location.href = '/dashboard.html';
+      } catch (err) {
+        notice.textContent = 'Network error';
+        notice.style.display = 'block';
+        notice.style.color = 'var(--danger)';
+      }
+    });
+  </script>
+</body>
+</html>
