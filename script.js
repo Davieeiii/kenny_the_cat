@@ -3,6 +3,26 @@ const ZEALY_LEADERBOARD_URL = "https://zealy.io/cw/kennyverse/leaderboard";
 const REFRESH_SECONDS = 60;
 const API_BASE = window.KENNY_ZEALY_API_BASE || "/api/zealy";
 const SESSION_TOKEN_KEY = "kenny_airdrop_session_token";
+
+// Responsive nav toggle
+(function(){
+  const navToggle = document.getElementById('navToggle');
+  const siteNav = document.querySelector('.site-nav');
+  if (!navToggle || !siteNav) return;
+  navToggle.addEventListener('click', () => {
+    const isOpen = siteNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  // Close menu when a nav link is clicked (mobile)
+  const navLinks = siteNav.querySelectorAll('a');
+  navLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      siteNav.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
 const WALLET_KEY = "kenny_airdrop_wallet";
 
 const TASKS = {
@@ -517,9 +537,90 @@ function exportCsv() {
 }
 
 if (elements.signupForm) {
+  const sendVerificationBtn = document.getElementById('sendVerificationBtn');
+
+  async function sendVerification(name, email, password, wallet) {
+    if (!email) throw new Error('Email required');
+    const resp = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, wallet }),
+    });
+
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to send verification');
+    }
+
+    return true;
+  }
+
+  // initialize UI state
+  const otpArea = document.querySelector('.otp_verify');
+  const submitBtn = elements.signupForm.querySelector('button[type="submit"]');
+  if (otpArea) otpArea.hidden = true;
+  // If user enters an email, require verification before enabling submit
+  const initialEmail = elements.signupForm.querySelector('#Email')?.value?.trim();
+  if (initialEmail) {
+    submitBtn.disabled = true;
+  }
+
+  sendVerificationBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = elements.signupForm.querySelector('#Email')?.value?.trim();
+    const name = elements.signupForm.querySelector('#signupUsername')?.value?.trim();
+    const password = elements.signupForm.querySelector('#signupPassword')?.value || '';
+    const wallet = elements.signupWallet.value.trim();
+
+    if (!email) {
+      alert('Please enter your email first');
+      return;
+    }
+
+    try {
+      elements.signupForm.hidden = true;
+      elements.signupLoading.hidden = false;
+      elements.loadingStatus.textContent = 'Sending verification email...';
+      await sendVerification(name, email, password, wallet);
+      elements.loadingStatus.textContent = 'Verification code sent. Check your inbox.';
+
+      // show OTP area and hide send button, require verification before continue
+      if (otpArea) otpArea.hidden = false;
+      sendVerificationBtn.hidden = true;
+      submitBtn.disabled = true;
+    } catch (err) {
+      elements.signupLoading.hidden = true;
+      elements.signupForm.hidden = false;
+      alert('Failed to send verification: ' + err.message);
+    }
+  });
+
   elements.signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    const email = elements.signupForm.querySelector('#Email')?.value?.trim();
+    const name = elements.signupForm.querySelector('#signupUsername')?.value?.trim();
+    const password = elements.signupForm.querySelector('#signupPassword')?.value || '';
+    const wallet = elements.signupWallet.value.trim();
+
+    // If an email is provided, require verification via email link before creating a permanent account.
+    if (email) {
+      try {
+        elements.signupForm.hidden = true;
+        elements.signupLoading.hidden = false;
+        elements.loadingStatus.textContent = 'Sending verification code...';
+        await sendVerification(name, email, password, wallet);
+        elements.loadingStatus.textContent = 'Verification code sent. Check your inbox.';
+        return;
+      } catch (err) {
+        elements.signupLoading.hidden = true;
+        elements.signupForm.hidden = false;
+        alert('Failed to send verification: ' + err.message);
+        return;
+      }
+    }
+
+    // No email provided — proceed with local device account as before
     try {
       elements.signupForm.hidden = true;
       await runSignupLoading();
@@ -538,6 +639,111 @@ if (elements.signupForm) {
       alert(error.message);
     }
   });
+
+  // OTP verify handler
+  const otpInput = document.getElementById('signupEmailOTP');
+  const verifyBtn = document.getElementById('signupEmailOTP_btn');
+  const resendBtn = document.getElementById('resendOtpBtn');
+
+  verifyBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = elements.signupForm.querySelector('#Email')?.value?.trim();
+    const otp = otpInput?.value?.trim();
+
+    if (!email || !otp) {
+      alert('Please provide the code sent to your email');
+      return;
+    }
+
+    try {
+      elements.signupLoading.hidden = false;
+      elements.loadingStatus.textContent = 'Verifying code...';
+      const resp = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        throw new Error(data.error || 'Verification failed');
+      }
+
+      elements.loadingStatus.textContent = 'Email verified.';
+
+      if (data.token) {
+        localStorage.setItem(SESSION_TOKEN_KEY, data.token);
+        localStorage.setItem(WALLET_KEY, data.account?.wallet || data.account?.email || '');
+      }
+
+      // hide OTP UI, enable submit (continue) button
+      const otpAreaLocal = document.querySelector('.otp_verify');
+      if (otpAreaLocal) otpAreaLocal.hidden = true;
+      if (typeof sendVerificationBtn !== 'undefined' && sendVerificationBtn) sendVerificationBtn.hidden = true;
+      const submitBtnLocal = elements.signupForm.querySelector('button[type="submit"]');
+      if (submitBtnLocal) submitBtnLocal.disabled = false;
+      elements.signupLoading.hidden = true;
+      elements.signupForm.hidden = false;
+
+      elements.loadingStatus.textContent = 'Verified — you can continue to the tracker.';
+    } catch (err) {
+      elements.signupLoading.hidden = true;
+      elements.signupForm.hidden = false;
+      alert('Verification failed: ' + err.message);
+    }
+  });
+
+  // Resend handler with simple cooldown
+  let resendCooldown = 60;
+  let resendTimer = null;
+
+  resendBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = elements.signupForm.querySelector('#Email')?.value?.trim();
+    const wallet = elements.signupWallet.value.trim();
+
+    if (!email) {
+      alert('Enter your email first');
+      return;
+    }
+
+    if (resendTimer) return; // cooldown active
+
+    try {
+      elements.signupLoading.hidden = false;
+      elements.loadingStatus.textContent = 'Resending code...';
+      const resp = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, wallet }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to resend');
+      elements.loadingStatus.textContent = 'Code resent. Check your inbox.';
+
+      // start cooldown UI
+      resendBtn.disabled = true;
+      let remaining = resendCooldown;
+      resendBtn.textContent = `Resend (${remaining}s)`;
+      resendTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(resendTimer);
+          resendTimer = null;
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend code';
+        } else {
+          resendBtn.textContent = `Resend (${remaining}s)`;
+        }
+      }, 1000);
+    } catch (err) {
+      elements.signupLoading.hidden = true;
+      elements.signupForm.hidden = false;
+      alert('Failed to resend: ' + err.message);
+    }
+  });
+
 }
 
 if (elements.leaderboardBody) {

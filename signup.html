@@ -25,6 +25,11 @@
         </span>
         <span class="brand-text">Kenny the Cat</span>
       </a>
+
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+
       <nav class="site-nav" aria-label="Signup navigation">
         <a href="index.html">HOME</a>
       </nav>
@@ -76,8 +81,12 @@
           </div>
 
           <label>
-            Username
+            Name
             <input id="signupUsername" type="text" required placeholder="KennyFan">
+          </label>
+          <label>
+            Password
+            <input id="signupPassword" type="password" required placeholder="Choose a secure password">
           </label>
           <label>
             Wallet address
@@ -103,8 +112,9 @@
             <input id="signupEmailOTP" type="text" required placeholder="Enter OTP">
           </label>
           <button class="btn_otp" id="signupEmailOTP_btn">Verify</button>
+          <button class="btn" id="resendOtpBtn" type="button">Resend code</button>
           </div>
-          <button class="btn">Send OTP</button>
+          <button id="sendVerificationBtn" class="btn" type="button">Send verification email</button>
 
           <button class="button button-primary" type="submit">Continue to tracker</button>
           <p class="form-note">
