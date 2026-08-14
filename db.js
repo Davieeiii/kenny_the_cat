@@ -47,6 +47,9 @@ export async function initDb() {
       wallet TEXT,
       xUsername TEXT,
       telegramUsername TEXT,
+      email TEXT,
+      emailVerified INTEGER DEFAULT 0,
+      emailVerifiedAt TEXT,
       points INTEGER DEFAULT 0,
       invites INTEGER DEFAULT 0,
       completedTasks TEXT,
@@ -56,6 +59,110 @@ export async function initDb() {
       updatedAt TEXT
     )
   `);
+
+  // Attempt to add newer columns if DB was created earlier without them
+  try {
+    await runAsync('ALTER TABLE accounts ADD COLUMN email TEXT');
+  } catch (e) {}
+  try {
+    await runAsync('ALTER TABLE accounts ADD COLUMN emailVerified INTEGER DEFAULT 0');
+  } catch (e) {}
+  try {
+    await runAsync('ALTER TABLE accounts ADD COLUMN emailVerifiedAt TEXT');
+  } catch (e) {}
+
+  // Email verification tokens (one-click)
+  await runAsync(`
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT,
+      wallet TEXT,
+      tokenHash TEXT,
+      expiresAt INTEGER,
+      usedAt INTEGER,
+      createdAt INTEGER
+    )
+  `);
+
+  // OTP table for short numeric codes
+  await runAsync(`
+    CREATE TABLE IF NOT EXISTS email_otps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT,
+      wallet TEXT,
+      otpHash TEXT,
+      salt TEXT,
+      expiresAt INTEGER,
+      attempts INTEGER DEFAULT 0,
+      maxAttempts INTEGER DEFAULT 5,
+      usedAt INTEGER,
+      createdAt INTEGER
+    )
+  `);
+}
+
+export async function createEmailVerification({ email, wallet, tokenHash, expiresAt }) {
+  const now = Date.now();
+  const res = await runAsync(
+    'INSERT INTO email_verifications (email, wallet, tokenHash, expiresAt, createdAt) VALUES (?, ?, ?, ?, ?)',
+    [email, wallet || null, tokenHash, expiresAt, now]
+  );
+  return res.lastID;
+}
+
+export async function findEmailVerificationByHash(tokenHash) {
+  const row = await getAsync('SELECT * FROM email_verifications WHERE tokenHash = ? LIMIT 1', [tokenHash]);
+  return row || null;
+}
+
+export async function markEmailVerificationUsed(id) {
+  const now = Date.now();
+  await runAsync('UPDATE email_verifications SET usedAt = ? WHERE id = ?', [now, id]);
+}
+
+export async function createOtp({ email, wallet, otpHash, salt, expiresAt, maxAttempts = 5 }) {
+  const now = Date.now();
+  // Invalidate existing otps for this email (soft: mark usedAt)
+  await runAsync('UPDATE email_otps SET usedAt = ? WHERE email = ? AND usedAt IS NULL', [now, email]);
+
+  const res = await runAsync(
+    'INSERT INTO email_otps (email, wallet, otpHash, salt, expiresAt, attempts, maxAttempts, createdAt) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+    [email, wallet || null, otpHash, salt, expiresAt, maxAttempts, now]
+  );
+
+  return res.lastID;
+}
+
+export async function getLatestOtpForEmail(email) {
+  const row = await getAsync('SELECT * FROM email_otps WHERE email = ? ORDER BY createdAt DESC LIMIT 1', [email]);
+  return row || null;
+}
+
+export async function incrementOtpAttempts(id) {
+  await runAsync('UPDATE email_otps SET attempts = attempts + 1 WHERE id = ?', [id]);
+}
+
+export async function markOtpUsed(id) {
+  const now = Date.now();
+  await runAsync('UPDATE email_otps SET usedAt = ? WHERE id = ?', [now, id]);
+}
+
+export async function invalidateOtpsForEmail(email) {
+  const now = Date.now();
+  await runAsync('UPDATE email_otps SET usedAt = ? WHERE email = ? AND usedAt IS NULL', [now, email]);
+}
+
+export async function findAccountByEmail(email) {
+  if (!email) return null;
+  const row = await getAsync('SELECT * FROM accounts WHERE lower(email) = lower(?) LIMIT 1', [email]);
+  if (!row) return null;
+  return {
+    ...row,
+    points: Number(row.points || 0),
+    invites: Number(row.invites || 0),
+    completedTasks: row.completedTasks ? JSON.parse(row.completedTasks) : [],
+    meme: row.meme ? JSON.parse(row.meme) : { title: 'No meme submission', status: 'pending' },
+  };
 }
 
 export async function getAllAccounts() {
