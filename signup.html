@@ -84,29 +84,16 @@
           </div>
 
           <label>
-            Name
-            <input id="signupUsername" type="text" required placeholder="KennyFan">
+           Name
+           <input id="signupUsername" type="text" required placeholder="KennyFan">
           </label>
           <label>
-            Password
-            <input id="signupPassword" type="password" required placeholder="Choose a secure password">
+           Email
+           <input id="Email" type="email" placeholder="kennyfan@gmail.com" required>
           </label>
           <label>
-            Wallet address
-            <input id="signupWallet" type="text" required placeholder="Paste your Solana wallet address">
-          </label>
-          <label>
-            X username
-            <input id="signupX" type="text" placeholder="@kennyfan">
-          </label>
-          <label>
-            Telegram username
-            <input id="signupTelegram" type="text" placeholder="@kennyfan">
-          </label>
-
-           <label>
-            Email
-            <input id="Email" type="email" placeholder="kennyfan@gmail.com">
+           Password
+           <input id="signupPassword" type="password" required placeholder="Choose a secure password">
           </label>
 
           <div class="otp_verify">
@@ -115,11 +102,11 @@
             <input id="signupEmailOTP" type="text" required placeholder="Enter OTP">
           </label>
           <button class="btn_otp" id="signupEmailOTP_btn">Verify</button>
-          <button class="btn" id="resendOtpBtn" type="button">Resend code</button>
+          <button class="btn resend-btn" id="resendOtpBtn" type="button">Resend code</button>
           </div>
-          <button id="sendVerificationBtn" class="btn" type="button">Send verification email</button>
+          <button id="sendVerificationBtn" class="btn small-action-btn" type="button">Send code</button>
 
-          <button class="button button-primary" type="submit">Continue to tracker</button>
+          <button class="button button-primary" type="submit" id="continueSignupBtn" hidden>Continue to tracker</button>
           <p class="form-note">
             Your signup is saved on this device and opens your airdrop dashboard.
           </p>
