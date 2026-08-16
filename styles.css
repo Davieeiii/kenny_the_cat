@@ -182,8 +182,9 @@ button {
   .site-nav {
     display: none;
     position: fixed;
-    top: 3.75rem; /* below header */
-    right: 1rem;
+    top: 3.25rem;
+    left: 0.75rem;
+    right: auto;
     background: rgba(6, 18, 44, 0.98);
     border: 1px solid rgba(159,179,200,0.06);
     padding: 0.5rem 0.75rem;
@@ -191,25 +192,44 @@ button {
     gap: 0.25rem;
     min-width: 12rem;
     border-radius: 12px;
-    z-index: 10000;
+    z-index: 2147483647;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    pointer-events: none;
   }
 
-  .site-nav.open { display: flex; }
+  .site-nav.open {
+    display: flex;
+    pointer-events: auto;
+  }
 
-  .site-nav a { display: block; padding: 0.6rem 0.75rem; color: var(--muted); }
+  .site-nav a {
+    display: block;
+    padding: 0.6rem 0.75rem;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
   .site-nav a:active, .site-nav a:focus { background: rgba(255,255,255,0.02); }
 
   .site-header {
     align-items: center;
     padding: 0.6rem 0.75rem;
     position: relative;
+    justify-content: flex-end;
+    z-index: 100;
+  }
+
+  .brand {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.6rem;
+    z-index: 101;
   }
 
   .brand-mark { width: 3rem; height: 3rem; }
   .brand-text { display: none; }
 
-  .nav-toggle { position: fixed; right: 0.75rem; top: 0.6rem; z-index: 10001; }
+  .nav-toggle { position: fixed; left: 0.75rem; top: 0.6rem; z-index: 2000000000; }
 }
 
 .site-nav a:hover,
