@@ -999,7 +999,7 @@ h3 {
    transition: 0.5s;
    color: #fff;
 }
-  
+   
 
 .btn{
   padding: 10px;
@@ -1013,6 +1013,14 @@ h3 {
   width:150px;
 }
 
+.small-action-btn,
+.resend-btn {
+  width: auto;
+  min-width: 8.5rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+}
+
 .btn:hover{
    transform: translateY(-2px);
    transition: 0.5s;
@@ -1020,7 +1028,7 @@ h3 {
 }
 
 /*.otp_verify{
-  
+   
 }*/
 
 
